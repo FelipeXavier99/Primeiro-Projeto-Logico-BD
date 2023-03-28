@@ -1,0 +1,152 @@
+﻿
+
+
+create table client(
+id int not null primary key,
+name varchar(50),
+cpf char(11) ,
+andress varchar(20),
+constraint unique_cpf unique(cpf) 
+ );
+
+
+    
+create table product(
+id_product int not null primary key,
+name varchar(50),
+type_product varchar(15),
+  id_forcecedor_product_ int
+
+);
+
+SELECT*from product
+
+
+create table payments(
+id_cliente int,
+id_payments int,
+name varchar(50),
+type_payment varchar(30),
+primary key (id_cliente,id_payments)
+);
+
+
+    
+create table orders(
+id_Order int primary key,
+id_Order_Client int,
+order_description varchar(30),
+    constraint pk_ordens_client foreign key (id_Order_Client) references client(id)   
+)
+
+
+
+
+create table productStorage(
+id_product int primary key,
+storage_location varchar(30),
+order_description varchar(30),
+    quantify int default  0   
+)
+
+
+
+   
+create table supplier(
+  id_supplier int primary key,
+  id_supplier_seller int,
+  fornecedor_product int,
+    name varchar(30),
+    CNPJ char(15) not null,
+    contact char(11) default 0,
+    constraint unique_CNPJ_supplier unique (CNPJ),
+   constraint pk_supplier_seller foreign key (id_supplier_seller) references seller(id_seller_suplier) ,
+  constraint fk_fornecedor_product foreign key( fornecedor_product ) references product (id_forcecedor_product_)
+)
+ 
+
+
+create table seller(
+    id_seller int primary key,
+    name varchar(30),
+    CPF char(12) not null,
+    CNPJ char(15) not null,
+    contact char(11) default 0,
+    location varchar(100),
+    id_seller_suplier int,
+    constraint unique_cpf_seller unique (CPF),
+    constraint unique_CNPJ_seller unique (CNPJ)
+)
+
+
+
+create table productSeller(
+idSeller int,
+idProdcut int ,
+quantify int default 1,
+PRIMARY key (idSeller,idProdcut),
+constraint fk_product_seller foreign KEY(idSeller) references seller(id_seller ),
+constraint fk_product_product foreign key(idProdcut) references product (id_product)
+)
+
+
+  --INSERTS
+
+INSERT INTO client(id,name,cpf,andress) values(1,"Marcelo","123456789","rua tertuliano")
+INSERT INTO client(id,name,cpf,andress) values(2,"Osvaldo","93454789","rua de brito",4)
+INSERT INTO client(id,name,cpf,andress) values(3,"Biel","3254798947","rodovia gaspar")
+  select*from client
+
+
+insert into product (id_product,name,type_product) values(1,"celular","motorola")
+insert into product (id_product,name,type_product,id_forcecedor_product_) values(2,"celular","moto E",3)
+insert into product (id_product,name,type_product,id_forcecedor_product_) values(4,"celular","xiaomi",4)
+  SELECT*from product
+  
+  
+
+INSERT into payments (id_cliente,id_payments,name,type_payment) values (1,1,"débito","a vista")
+INSERT into payments (id_cliente,id_payments,name,type_payment) values (2,2,"crédito","parcelado em 10x")
+  SELECT*from payments
+  
+  
+INSERT INTO orders (id_Order,id_Order_Client ,order_description) values(1,1,"1° OS")
+  SELECT*from orders
+  
+  INSERT INTO productStorage(id_product,storage_location,order_description,quantify) values(1,"Florianópolis","fechado",3)
+    SELECT *FROM productStorage
+    
+    INSERT INTO supplier (id_supplier,id_supplier_seller, fornecedor_product,name,cnpj,contact) VALUES (1,1,1,"AMBEV","12121212","4845499545")
+    INSERT INTO supplier (id_supplier,id_supplier_seller, fornecedor_product,name,cnpj,contact) VALUES (2,2,2,"XIAOMI","999999","9999")
+    INSERT INTO supplier (id_supplier,id_supplier_seller, fornecedor_product,name,cnpj,contact) VALUES (3,3,3,"MOTOROLA BR","7777","9977799")
+    SELECT*FROM supplier
+  
+  
+  INSERT INTO seller (id_seller,name,CPF,CNPJ,contact,location, id_seller_suplier) values(1,"Joao","0795121212","8888888","47577777","SC",1)
+  SELECT*FROM seller
+  
+  INSERT INTO productSeller (idSeller,idProdcut,quantify) VALUES(1,1,5)
+  SELECT*from productSeller
+  
+  
+  ---PERGUNTAS
+  
+  -- Quantos pedidos foram realizados pelo cliente?client
+  SELECT c.name as nome,COUNT(*) as "Numeros em ordem" from client c
+  INNER JOIN orders o ON c.id= o.id_Order_Client
+  
+-- Algum vendedor também é fornecedor?(seller,supplier)
+SELECT se.name as vendedor,su.name as fornecedor from seller se
+INNER JOIN supplier su ON se.id_seller_suplier = su.id_supplier_seller
+
+--Relação de produtos fornecedores e estoques;
+SELECT*from productSeller se
+INNER JOIN product p on p.id_product= se.idProdcut
+GROUp by type_product
+ORDER by  type_product DESC 
+
+--Relação de nomes dos fornecedores e nomes dos produtos;
+SELECT s.name as fornecedor,p.name from supplier s
+INNER JOIN product p on s.fornecedor_product = p.id_forcecedor_product_
+
+  
