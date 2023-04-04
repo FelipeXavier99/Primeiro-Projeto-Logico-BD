@@ -1,37 +1,17 @@
-﻿
+ 
 
 
 create table client(
 id int not null primary key,
 name varchar(50),
-cpf char(11) ,
+cpf_ou_cnpj int ,
 andress varchar(20),
-constraint unique_cpf unique(cpf) 
+constraint unique_cpf unique(cpf_ou_cnpj) 
+
+-- fazer uma provedure para cpf_ou_cnpj
  );
 
-
-    
-create table product(
-id_product int not null primary key,
-name varchar(50),
-type_product varchar(15),
-  id_forcecedor_product_ int
-
-);
-
-SELECT*from product
-
-
-create table payments(
-id_cliente int,
-id_payments int,
-name varchar(50),
-type_payment varchar(30),
-primary key (id_cliente,id_payments)
-);
-
-
-    
+    -- pedido
 create table orders(
 id_Order int primary key,
 id_Order_Client int,
@@ -41,9 +21,25 @@ order_description varchar(30),
 
 
 
+ --drop table product
+    
+create table product(
+id_product int not null,
+id_forcecedor_product int,
+name_product varchar(50),
+type_product varchar(15),
+fk_product_storage int,
 
+primary key (id_product,id_forcecedor_product),
+constraint pk_product_ordens foreign key (id_product) references orders(id_Order),
+constraint pk_product_Storage foreign key (fk_product_storage) references productStorage(id_product_storage)  
+
+);
+
+
+-- estoque
 create table productStorage(
-id_product int primary key,
+id_product_storage int primary key,
 storage_location varchar(30),
 order_description varchar(30),
     quantify int default  0   
@@ -51,23 +47,20 @@ order_description varchar(30),
 
 
 
-   
-create table supplier(
-  id_supplier int primary key,
-  id_supplier_seller int,
-  fornecedor_product int,
-    name varchar(30),
-    CNPJ char(15) not null,
-    contact char(11) default 0,
-    constraint unique_CNPJ_supplier unique (CNPJ),
-   constraint pk_supplier_seller foreign key (id_supplier_seller) references seller(id_seller_suplier) ,
-  constraint fk_fornecedor_product foreign key( fornecedor_product ) references product (id_forcecedor_product_)
-)
- 
 
+create table payments(
+id_payments int primary key,
+id_seller int,
+type_payment varchar(30)
 
+);
+
+drop table seller
+
+-- vendedora
 create table seller(
     id_seller int primary key,
+   id_payments int, 
     name varchar(30),
     CPF char(12) not null,
     CNPJ char(15) not null,
@@ -75,30 +68,46 @@ create table seller(
     location varchar(100),
     id_seller_suplier int,
     constraint unique_cpf_seller unique (CPF),
-    constraint unique_CNPJ_seller unique (CNPJ)
+    constraint unique_CNPJ_seller unique (CNPJ),
+constraint pk_seller_payments foreign key (id_payments) references payments(id_payments)
+ 
 )
 
 
+   -- forncedor
+create table supplier(
+   fornecedor_product int primary key,
+    name_supplier varchar(30),
+    CNPJ char(15) not null,
+    contact char(11) default 0,
+    constraint unique_CNPJ_supplier unique (CNPJ),
+  constraint fk_fornecedor_productt foreign key( fornecedor_product ) references product (id_product)
+)
 
+-- drop table productSeller
 create table productSeller(
 idSeller int,
-idProdcut int ,
+idProdcut int  ,
 quantify int default 1,
-PRIMARY key (idSeller,idProdcut),
-constraint fk_product_seller foreign KEY(idSeller) references seller(id_seller ),
-constraint fk_product_product foreign key(idProdcut) references product (id_product)
+PRIMARY key (idProdcut,idSeller),
+ -- constraint fk_product_seller foreign KEY(idSeller) references seller (id_seller)
+ -- constraint fk_product_product foreign key(idProdcut) references product (id_forcecedor_product)
 )
 
 
   --INSERTS
 
-INSERT INTO client(id,name,cpf,andress) values(1,"Marcelo","123456789","rua tertuliano")
-INSERT INTO client(id,name,cpf,andress) values(2,"Osvaldo","93454789","rua de brito",4)
-INSERT INTO client(id,name,cpf,andress) values(3,"Biel","3254798947","rodovia gaspar")
+INSERT INTO client(id,name,cpf_ou_cnpj,andress) values(1,"Marcelo","123456789","rua tertuliano")
+INSERT INTO client(id,name,cpf_ou_cnpj,andress) values(2,"Osvaldo","93454789","rua de brito")
+INSERT INTO client(id,name,cpf_ou_cnpj,andress) values(3,"Biel","3254798947","rodovia gaspar")
   select*from client
 
 
-insert into product (id_product,name,type_product) values(1,"celular","motorola")
+INSERT INTO orders (id_Order,id_Order_Client ,order_description) values(1,1,"1° pedido")
+  SELECT*from orders
+  
+
+insert into product (id_product,name_product,type_product,id_forcecedor_product,fk_product_storage) values(1,"celular","motorola",1,1)
 insert into product (id_product,name,type_product,id_forcecedor_product_) values(2,"celular","moto E",3)
 insert into product (id_product,name,type_product,id_forcecedor_product_) values(4,"celular","xiaomi",4)
   SELECT*from product
@@ -110,9 +119,7 @@ INSERT into payments (id_cliente,id_payments,name,type_payment) values (2,2,"cr�
   SELECT*from payments
   
   
-INSERT INTO orders (id_Order,id_Order_Client ,order_description) values(1,1,"1° OS")
-  SELECT*from orders
-  
+
   INSERT INTO productStorage(id_product,storage_location,order_description,quantify) values(1,"Florianópolis","fechado",3)
     SELECT *FROM productStorage
     
